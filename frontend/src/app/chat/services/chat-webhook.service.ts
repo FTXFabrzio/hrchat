@@ -17,7 +17,7 @@ export class ChatWebhookService {
     return this.http
       .post(config.url, { message }, { responseType: 'text' })
       .pipe(
-        timeout(20000),
+        timeout(120000),
         map((response) => this.extractText(response)),
       );
   }

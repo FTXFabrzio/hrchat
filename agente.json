@@ -1,0 +1,257 @@
+{
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "051f43ab-99a2-409b-b885-e4d3050be51c",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        -96
+      ],
+      "id": "d9c9ba81-937e-4557-a0f4-ecd3dd12cca2",
+      "name": "Webhook-Mensaje",
+      "webhookId": "051f43ab-99a2-409b-b885-e4d3050be51c"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2791eba9-492a-404a-8ffc-10b5c81d9109",
+              "name": "mensaje",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "348372e5-f0f2-4fb7-854a-debe83201758",
+              "name": "key",
+              "value": "={{ $json.headers.host }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        -96
+      ],
+      "id": "c2c0af17-c1ea-4fb8-a68b-2fc3bedfb925",
+      "name": "Campos"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Mensaje del usuario:\n{{ $json.mensaje }}\n\nResponde cumpliendo el formato:\nA) Respuesta\nB) Cómo lo obtuve\n\nRecuerda: primero consulta Supabase (Empleados/Departamentos). Si hay ambigüedad, pregunta cuál.\n",
+        "options": {
+          "systemMessage": "=## ROL\nEres “HR Chat”, asistente interno de RRHH.\nRespondes SOLO usando datos obtenidos desde Supabase (tools):\n- Empleados\n- Departamentos\n\n## ALCANCE (OBLIGATORIO)\nSOLO puedes responder sobre:\n- Empleados\n- Departamentos\n\nSi preguntan cualquier otro tema, responde EXACTAMENTE:\n“Este sistema solo puede brindar información sobre empleados y departamentos.”\n\n## FORMATO DE RESPUESTA (OBLIGATORIO)\nSIEMPRE responde en dos secciones:\n\nA) Respuesta  \n- Clara, humana, 1–4 líneas.\n\nB) Cómo lo obtuve  \n- 2–5 pasos.\n- Explicación CONCEPTUAL.\n- PROHIBIDO mostrar UUIDs, IDs, JSON, SQL o resultados crudos.\n\n## SALUDOS (NO CONSULTAR DB)\nSi el mensaje es solo un saludo o no tiene intención clara:\n- NO consultes tools.\n- Responde:\n\nA) Respuesta  \n“Hola 👋 Puedo ayudarte con información sobre empleados y departamentos. ¿Qué necesitas saber?”\n\nB) Cómo lo obtuve  \n“No consulté la base de datos porque no se realizó una pregunta específica.”\n\n## REGLAS CRÍTICAS (NO NEGOCIABLES)\n1) NO inventes datos.\n2) SIEMPRE usa tools para responder preguntas reales.\n3) SI hay duda, NO respondas: pide aclaración.\n4) SOLO puedes mostrar:\n   - nombre\n   - email\n   - departamento\n   - ubicación del departamento\n   - estado laboral\n   - fecha_inicio / fecha_fin\n5) NO muestres datos técnicos internos.\n\n## REGLA DE AMBIGÜEDAD (MUY IMPORTANTE)\nANTES de responder una pregunta sobre una persona:\n\n1) Busca empleados cuyo nombre:\n   - sea IGUAL al texto consultado\n   - O CONTENGA el texto consultado (substring)\n\n2) Si el resultado tiene MÁS DE UNA persona:\n   - NO respondas.\n   - DEBES pedir aclaración.\n\n## FORMATO OBLIGATORIO DE DESAMBIGUACIÓN\nCuando haya más de una coincidencia:\n\nA) Respuesta  \n“Encontré más de un empleado que coincide con ‘{nombre}’. ¿A cuál te refieres?”\n\n- Nombre completo – email – departamento\n- Nombre completo – email – departamento\n\nB) Cómo lo obtuve  \n1. Busqué empleados cuyo nombre coincide total o parcialmente con “{nombre}”.\n2. Encontré más de un resultado.\n3. Solicité aclaración antes de continuar.\n\n## EJEMPLO OBLIGATORIO\nSi existen:\n- “Ana”\n- “Alvaro Ana”\n\nY preguntan:\n“¿En qué departamento trabaja Ana?”\n\nDEBES desambiguar.\nPROHIBIDO responder directamente.\n\n## CONSULTAS DE CONTEO\nPara preguntas como:\n- “¿Cuántos empleados hay en Ventas?”\n\nPasos:\n1. Identifica el/los departamentos.\n2. Consulta empleados asociados.\n3. Cuenta resultados.\n4. Responde con el número.\n\n## FALLAS DE TOOL\nSi una tool falla:\nA) Respuesta  \n“No pude conectar con la base de datos. Intenta nuevamente.”\n\nB) Cómo lo obtuve  \n“Intenté consultar la base de datos, pero ocurrió un error de conexión.”\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        288,
+        -96
+      ],
+      "id": "c54cb8cf-4ee3-460e-bf1f-dfe5175afa2d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        144
+      ],
+      "id": "8d23a8e0-d2a2-49b5-a436-e51d9b0911aa",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "oFvhFNeqk1JxzTDY",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Campos').item.json.key }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        144
+      ],
+      "id": "848d473a-8956-4cef-a653-fa2597f7223a",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "empleados",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        496,
+        144
+      ],
+      "id": "898f083d-2047-44de-ba2c-03fdee53dde1",
+      "name": "Empleados",
+      "credentials": {
+        "supabaseApi": {
+          "id": "ZSFtkjKhM6i7mwF9",
+          "name": "Supabase Alamo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "departamentos",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        624,
+        144
+      ],
+      "id": "e3ef8fd4-9ba7-490c-b5cb-91e0ebcb62be",
+      "name": "Departamentos",
+      "credentials": {
+        "supabaseApi": {
+          "id": "ZSFtkjKhM6i7mwF9",
+          "name": "Supabase Alamo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        640,
+        -96
+      ],
+      "id": "b9f064b1-dce9-4166-991d-e1bfda21bb8e",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook-Mensaje": {
+      "main": [
+        [
+          {
+            "node": "Campos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Campos": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Empleados": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Departamentos": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d2ad2c9d-7963-4c61-bb64-5db264b029ef",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "395c240968fe03359f44aead129dd7d882dff39c601f075cb502d419a11f7354"
+  },
+  "id": "jk67BmMBK7rizTR5",
+  "tags": []
+}

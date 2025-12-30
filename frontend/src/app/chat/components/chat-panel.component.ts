@@ -1,8 +1,10 @@
 ﻿import {
   AfterViewInit,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   Input,
+  NgZone,
   ViewChild,
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -34,6 +36,8 @@ export class ChatPanelComponent implements AfterViewInit {
   constructor(
     private readonly formBuilder: FormBuilder,
     private readonly chatService: ChatWebhookService,
+    private readonly ngZone: NgZone,
+    private readonly cdr: ChangeDetectorRef,
   ) {
     this.form = this.formBuilder.group({
       message: ['', [Validators.required, Validators.minLength(2)]],
@@ -62,26 +66,32 @@ export class ChatPanelComponent implements AfterViewInit {
 
     this.chatService.sendMessage(text, this.mode).subscribe({
       next: (answer) => {
-        this.messages = [
-          ...this.messages,
-          {
-            role: 'bot',
-            content: answer || 'No hubo respuesta del webhook.',
-          },
-        ];
-        this.isSending = false;
-        this.scrollToBottom();
+        this.ngZone.run(() => {
+          this.messages = [
+            ...this.messages,
+            {
+              role: 'bot',
+              content: answer || 'No hubo respuesta del webhook.',
+            },
+          ];
+          this.isSending = false;
+          this.cdr.detectChanges();
+          this.scrollToBottom();
+        });
       },
       error: () => {
-        this.messages = [
-          ...this.messages,
-          {
-            role: 'bot',
-            content: 'No fue posible conectar con el webhook.',
-          },
-        ];
-        this.isSending = false;
-        this.scrollToBottom();
+        this.ngZone.run(() => {
+          this.messages = [
+            ...this.messages,
+            {
+              role: 'bot',
+              content: 'No fue posible conectar con el webhook.',
+            },
+          ];
+          this.isSending = false;
+          this.cdr.detectChanges();
+          this.scrollToBottom();
+        });
       },
     });
   }
