@@ -1,0 +1,45 @@
+﻿<div class="login-page">
+  <div class="login-card">
+    <div class="logo">
+      <img src="assets/logo.png" alt="HR Chat" />
+      <div>
+        <h1>HR Chat</h1>
+        <p>Gestiona tus empleados</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label class="field">
+        <span>Email</span>
+        <input
+          type="email"
+          placeholder="Ingresa tu email"
+          formControlName="email"
+        />
+        <small *ngIf="form.get('email')?.touched && form.get('email')?.invalid">
+          Email invalido.
+        </small>
+      </label>
+
+      <label class="field">
+        <span>Contrasena</span>
+        <input
+          type="password"
+          placeholder="Ingresa tu contrasena"
+          formControlName="password"
+        />
+        <small *ngIf="form.get('password')?.touched && form.get('password')?.invalid">
+          La contrasena debe tener al menos 6 caracteres.
+        </small>
+      </label>
+
+      <div class="error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <button class="primary" type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Ingresando...' : 'Ingresar' }}
+        <span aria-hidden="true">&#10140;</span>
+      </button>
+    </form>
+  </div>
+</div>
+

@@ -1,0 +1,27 @@
+﻿<div class="chat-panel" [class.compact]="compact">
+  <div class="chat-header">
+    <div>
+      <h3>Chat RRHH</h3>
+      <p>Modo: Production</p>
+    </div>
+  </div>
+
+  <div class="chat-messages" #messagesContainer>
+    <div class="message" [class.user]="msg.role === 'user'" *ngFor="let msg of messages">
+      <span>{{ msg.content }}</span>
+    </div>
+    <div class="message bot" *ngIf="isSending">
+      <span>Escribiendo...</span>
+    </div>
+  </div>
+
+  <form class="chat-input" [formGroup]="form" (ngSubmit)="sendMessage()">
+    <input
+      type="text"
+      formControlName="message"
+      placeholder="Escribe tu pregunta"
+    />
+    <button type="submit" [disabled]="isSending">Enviar</button>
+  </form>
+</div>
+

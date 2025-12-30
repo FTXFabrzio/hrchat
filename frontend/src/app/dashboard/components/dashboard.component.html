@@ -1,0 +1,221 @@
+﻿<div class="dashboard-page">
+  <header class="top-bar">
+    <div class="brand">
+      <img src="assets/logo.png" alt="HR Chat" />
+      <div>
+        <strong>HR Chat</strong>
+        <span>Gestion de empleados</span>
+      </div>
+    </div>
+    <button class="ghost" type="button" (click)="logout()">Salir</button>
+  </header>
+
+  <div class="dashboard-grid">
+    <section class="main-content">
+      <div class="section">
+        <div class="section-header">
+          <h2>Departamentos</h2>
+          <button class="primary" type="button" (click)="openDepartmentModal()">
+            Anadir Departamento
+          </button>
+        </div>
+        <div class="search-row">
+          <input
+            type="text"
+            placeholder="Buscar"
+            [(ngModel)]="departmentSearch"
+            (input)="loadDepartments()"
+          />
+        </div>
+        <div class="table-card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Ubicacion</th>
+                  <th>Presupuesto</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let dept of departments">
+                  <td>{{ dept.nombre }}</td>
+                  <td>{{ dept.ubicacion || '-' }}</td>
+                  <td>S/ {{ dept.presupuesto || 0 | number:'1.2-2' }}</td>
+                  <td class="actions">
+                    <button type="button" (click)="openDepartmentModal(dept)">
+                      Editar
+                    </button>
+                    <button type="button" class="danger" (click)="deleteDepartment(dept)">
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="!departments.length && !isLoadingDepartments">
+                  <td colspan="4" class="empty">Sin registros</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Empleados</h2>
+          <button class="primary" type="button" (click)="openEmployeeModal()">
+            Anadir Empleado
+          </button>
+        </div>
+        <div class="search-row">
+          <input
+            type="text"
+            placeholder="Buscar"
+            [(ngModel)]="employeeSearch"
+            (input)="loadEmployees()"
+          />
+        </div>
+        <div class="table-card">
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Departamento</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let employee of employees">
+                  <td>{{ employee.nombre }}</td>
+                  <td>{{ employee.email }}</td>
+                  <td>{{ employee.departamento?.nombre || '-' }}</td>
+                  <td>
+                    <span class="status">{{ employee.estado }}</span>
+                  </td>
+                  <td class="actions">
+                    <button type="button" (click)="openEmployeeModal(employee)">
+                      Editar
+                    </button>
+                    <button type="button" class="danger" (click)="deleteEmployee(employee)">
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+                <tr *ngIf="!employees.length && !isLoadingEmployees">
+                  <td colspan="5" class="empty">Sin registros</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="chat-side">
+      <app-chat-panel [compact]="true"></app-chat-panel>
+    </aside>
+  </div>
+</div>
+
+<div class="modal" *ngIf="isDepartmentModalOpen">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>{{ editingDepartment ? 'Editar Departamento' : 'Nuevo Departamento' }}</h3>
+      <button type="button" class="close" (click)="closeDepartmentModal()">X</button>
+    </div>
+    <form [formGroup]="departmentForm" (ngSubmit)="saveDepartment()">
+      <label>
+        Nombre
+        <input type="text" formControlName="nombre" placeholder="Nombre del departamento" />
+        <small *ngIf="departmentForm.get('nombre')?.touched && departmentForm.get('nombre')?.invalid">
+          El nombre no permite caracteres especiales.
+        </small>
+      </label>
+      <label>
+        Ubicacion (Sede)
+        <select formControlName="ubicacion">
+          <option value="">Selecciona una sede</option>
+          <option *ngFor="let option of ubicacionOptions" [value]="option">{{ option }}</option>
+        </select>
+      </label>
+      <label>
+        Presupuesto (S/)
+        <input type="number" formControlName="presupuesto" min="0" placeholder="Presupuesto" />
+        <small *ngIf="departmentForm.get('presupuesto')?.touched && departmentForm.get('presupuesto')?.invalid">
+          No se permiten numeros negativos.
+        </small>
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="ghost" (click)="closeDepartmentModal()">Cancelar</button>
+        <button type="submit" class="primary">
+          {{ editingDepartment ? 'Guardar Cambios' : 'Crear Departamento' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal" *ngIf="isEmployeeModalOpen">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>{{ editingEmployee ? 'Editar Empleado' : 'Nuevo Empleado' }}</h3>
+      <button type="button" class="close" (click)="closeEmployeeModal()">X</button>
+    </div>
+    <form [formGroup]="employeeForm" (ngSubmit)="saveEmployee()">
+      <label>
+        Nombre del empleado
+        <input type="text" formControlName="nombre" placeholder="Nombre completo" />
+        <small *ngIf="employeeForm.get('nombre')?.touched && employeeForm.get('nombre')?.invalid">
+          El nombre no permite caracteres especiales.
+        </small>
+      </label>
+      <label>
+        Departamento
+        <select formControlName="id_departamento">
+          <option value="">Selecciona el departamento</option>
+          <option *ngFor="let dept of departments" [value]="dept.id">{{ dept.nombre }}</option>
+        </select>
+        <small *ngIf="employeeForm.get('id_departamento')?.touched && employeeForm.get('id_departamento')?.invalid">
+          Selecciona un departamento.
+        </small>
+      </label>
+      <label>
+        Email (Correo corporativo)
+        <input type="email" formControlName="email" placeholder="correo@empresa.com" />
+        <small *ngIf="employeeForm.get('email')?.touched && employeeForm.get('email')?.invalid">
+          Email invalido.
+        </small>
+      </label>
+      <label>
+        Estado
+        <select formControlName="estado">
+          <option *ngFor="let option of estadoOptions" [value]="option">{{ option }}</option>
+        </select>
+      </label>
+      <div class="date-row">
+        <label>
+          Fecha inicio
+          <input type="date" formControlName="fecha_inicio" />
+        </label>
+        <label>
+          Fecha fin
+          <input type="date" formControlName="fecha_fin" />
+        </label>
+      </div>
+      <small class="error" *ngIf="employeeForm.errors?.['dateRange']">
+        La fecha fin debe ser mayor o igual a la fecha inicio.
+      </small>
+      <div class="modal-actions">
+        <button type="button" class="ghost" (click)="closeEmployeeModal()">Cancelar</button>
+        <button type="submit" class="primary">
+          {{ editingEmployee ? 'Guardar Cambios' : 'Crear Empleado' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
